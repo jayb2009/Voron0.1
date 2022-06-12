@@ -1,0 +1,77 @@
+[neopixel pixies]
+pin:                     PA8
+chain_count:             4
+color_order: RGB
+
+
+
+[led_effect panel_idle]
+autostart:              false
+frame_rate:             24
+leds:
+    neopixel:pixies
+layers:
+    breathing  10 1 top (.2,.2,.2,)
+
+[gcode_macro led_off]
+gcode:
+    SET_LED LED=pixies RED=0 GREEN=0 BLUE=0
+
+[gcode_macro led_on]
+gcode:
+    SET_LED LED=pixies 
+
+#[gcode_macro led_status_white]
+#gcode:
+#    {% set WHITE = params.WHITE|default(0.8)|float %}
+#    SET_LED LED=pixies WHITE={WHITE}
+
+[gcode_macro led_status_red]
+gcode:
+    SET_LED LED=pixies RED=0.8 INDEX=1
+
+[gcode_macro led_status_green]
+gcode:
+    SET_LED LED=pixies GREEN=0.8 INDEX=1
+
+[gcode_macro led_status_blue]
+gcode:
+    SET_LED LED=pixies BLUE=0.8 INDEX=1
+
+[gcode_macro led_status_orange]
+gcode:
+    SET_LED LED=pixies RED=0.8 GREEN=0.35 INDEX=1
+
+[gcode_macro PULSE_COLOR]
+gcode:
+  {% set led = params.LED | default('pixies') | string %}
+  {% set speed = params.SPEED | default(3) | int %}
+  {% set steps = 5 %}
+
+  {% for i in range(25) %}
+    #UPDATE_DELAYED_GCODE ID=led_red DURATION={speed / 1000} LED={led} RED={(255 / (i + 1)) * dir}
+    SET_LED LED={led} RED={((i + 1) / 25)}
+  {% endfor%}
+  {% for j in range(25) %}
+    #UPDATE_DELAYED_GCODE ID=led_red DURATION={speed / 1000} LED={led} RED={(255 / (i + 1)) * dir}
+    SET_LED LED={led} RED={((25 - j) / 25.0)}
+  {% endfor %}
+
+[delayed_gcode pulse]
+gcode:
+  PULSE_COLOR
+  UPDATE_DELAYED_GCODE ID=pulse DURATION=2
+
+[gcode_macro PULSE]
+gcode:
+  UPDATE_DELAYED_GCODE ID=pulse DURATION=2
+
+[gcode_macro PULSE_STOP]
+gcode:
+  UPDATE_DELAYED_GCODE ID=pulse DURATION=0
+  SET_LED LED=pixies WHITE=0.3
+    
+
+
+
+
